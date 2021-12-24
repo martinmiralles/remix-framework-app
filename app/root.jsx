@@ -9,8 +9,6 @@ export const meta = () => {
   return {
     description, keywords
   }
-
-  
 }
 
  const App = () => {

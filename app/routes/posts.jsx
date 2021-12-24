@@ -1,5 +1,7 @@
 import { Outlet } from "remix"
 
+
+
 const Posts = () => {
     return (
         <>

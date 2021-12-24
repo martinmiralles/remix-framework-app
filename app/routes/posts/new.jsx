@@ -13,7 +13,7 @@ export const action = async ({request}) => {
 
     // @todo = submit to database
 
-    return redirect('/posts')
+    // return redirect('/posts')
 }
 
 const NewPost = () => {

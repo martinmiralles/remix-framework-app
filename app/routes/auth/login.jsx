@@ -1,5 +1,6 @@
 import { useActionData, json, redirect } from "remix";
 import { db } from "~/utils/db.server";
+import { login, createUserSession } from "~/utils/session.server";
 
 function validateUsername(username) {
   if (typeof username !== "string" || username.length < 3) {
@@ -39,8 +40,18 @@ export const action = async ({ request }) => {
   switch (loginType) {
     case "login": {
       //  Find User
+      const user = await login({ username, password });
+
       //  Check user
+      if (!user) {
+        return badRequest({
+          fields,
+          fieldErrors: { username: "Invalid Credentials" },
+        });
+      }
+
       //  Create user session
+      return createUserSession(user.id, "/posts");
     }
 
     case "register": {

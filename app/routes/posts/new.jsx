@@ -1,83 +1,100 @@
-import { Link, redirect, useActionData, json } from "remix"
-import {db} from '~/utils/db.server'
+import { Link, redirect, useActionData, json } from "remix";
+import { db } from "~/utils/db.server";
 
 const validateTitle = (title) => {
-    if(typeof title !== 'string' || title.length < 3 ) {
-        return 'Title should be at least 3 characters long'
-    }
-}
+  if (typeof title !== "string" || title.length < 3) {
+    return "Title should be at least 3 characters long";
+  }
+};
 
 const validateBody = (body) => {
-    if(typeof body !== 'string' || body.length < 10 ) {
-        return 'Body should be at least 10 characters long'
-    }
-}
+  if (typeof body !== "string" || body.length < 10) {
+    return "Body should be at least 10 characters long";
+  }
+};
 
-export const action = async ({request}) => {
-    // console.log('Sever message...')
+const badRequest = (data) => {
+  return json(data, { status: 400 });
+};
 
-    const form = await request.formData()
-    // console.log(form)
+export const action = async ({ request }) => {
+  // console.log('Sever message...')
 
-    const title = form.get('title')
-    const body = form .get('body')
+  const form = await request.formData();
+  // console.log(form)
 
-    const fields = {title, body}
+  const title = form.get("title");
+  const body = form.get("body");
 
-    // Validation before submitting
-    const fieldErrors =  {
-        title: validateTitle(title),
-        body: validateBody(body)
-    }
+  const fields = { title, body };
 
-    if(Object.values(fieldErrors).some(Boolean)) {
-        console.log(fieldErrors)
-        return json({fieldErrors, fields}, {status: 400})
-    }
+  // Validation before submitting
+  const fieldErrors = {
+    title: validateTitle(title),
+    body: validateBody(body),
+  };
 
-    // Submit to database
-    const post = await db.post.create({data: fields})
+  if (Object.values(fieldErrors).some(Boolean)) {
+    console.log(fieldErrors);
+    return badRequest({ fieldErrors, fields });
+  }
 
-    return redirect(`/posts/${post.id}`)
-}
+  // Submit to database
+  const post = await db.post.create({ data: fields });
+
+  return redirect(`/posts/${post.id}`);
+};
 
 const NewPost = () => {
-    const actionData = useActionData()
-    console.log("test: " + actionData)
+  const actionData = useActionData();
 
-    return (
-        <>
-        <div className="page-header">
-            <h1>New Post</h1>
-            <Link to='/posts' className='btn btn-reverse'>
-                Back
-            </Link>
-        </div>
+  return (
+    <>
+      <div className="page-header">
+        <h1>New Post</h1>
+        <Link to="/posts" className="btn btn-reverse">
+          Back
+        </Link>
+      </div>
 
-        <div className="page-content">
-            <form method='POST'>
-                <div className="form-control">
-                    <label htmlFor="title">Title</label>
-                    <input type="text" name="title" id="title" defaultValue={actionData?.fields?.title}/>
-                    <div className="error">
-                        <p>{actionData?.fieldErrors?.title && (actionData?.fieldErrors?.title)}</p>
-                    </div>
-                </div>
-                <div className="form-control">
-                    <label htmlFor="body">Post Body</label>
-                    <textarea type="text" name="body" id="body" defaultValue={actionData?.fields?.body}/>
-                    <div className="error">
-                        <p>{actionData?.fieldErrors?.body && (actionData?.fieldErrors?.body)}</p>
-                    </div>
-                </div>
-                <button type='submit' className="btn btn-block">
-                    Add Post
-                </button>
-            </form>
-        </div>
-            
-        </>
-    )
-}
+      <div className="page-content">
+        <form method="POST">
+          <div className="form-control">
+            <label htmlFor="title">Title</label>
+            <input
+              type="text"
+              name="title"
+              id="title"
+              defaultValue={actionData?.fields?.title}
+            />
+            <div className="error">
+              <p>
+                {actionData?.fieldErrors?.title &&
+                  actionData?.fieldErrors?.title}
+              </p>
+            </div>
+          </div>
+          <div className="form-control">
+            <label htmlFor="body">Post Body</label>
+            <textarea
+              type="text"
+              name="body"
+              id="body"
+              defaultValue={actionData?.fields?.body}
+            />
+            <div className="error">
+              <p>
+                {actionData?.fieldErrors?.body && actionData?.fieldErrors?.body}
+              </p>
+            </div>
+          </div>
+          <button type="submit" className="btn btn-block">
+            Add Post
+          </button>
+        </form>
+      </div>
+    </>
+  );
+};
 
-export default NewPost
+export default NewPost;

@@ -1,4 +1,5 @@
 import { Link, redirect } from "remix"
+import {db} from '~/utils/db.server'
 
 export const action = async ({request}) => {
     // console.log('Sever message...')
@@ -11,9 +12,10 @@ export const action = async ({request}) => {
 
     const fields = {title, body}
 
-    // @todo = submit to database
+    // Submit to database
+    const post = await db.post.create({data: fields})
 
-    // return redirect('/posts')
+    return redirect(`/posts/${post.id}`)
 }
 
 const NewPost = () => {

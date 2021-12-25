@@ -49,3 +49,41 @@ export const createUserSession = async (userId: string, redirectTo: string) => {
     },
   });
 };
+
+// Get user session
+export const getUserSession = (request: Request) => {
+  return storage.getSession(request.headers.get("Cookie"));
+};
+
+// Get logged in user
+export const getUser = async (request: Request) => {
+  const session = await getUserSession(request);
+  const userId = session.get("userId");
+
+  if (!userId || typeof userId !== "string") {
+    return null;
+  }
+
+  try {
+    const user = await db.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    return user;
+  } catch (error) {
+    return null;
+  }
+};
+
+// Logout user and destroy session
+export const logout = async (request: Request) => {
+  const session = await storage.getSession(request.headers.get("Cookie"));
+
+  return redirect("/auth/logout", {
+    headers: {
+      "Set-Cookie": await storage.destroySession(session),
+    },
+  });
+};
